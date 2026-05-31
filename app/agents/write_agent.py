@@ -2,19 +2,22 @@ from app.workflows.llm import OllamaLLM
 
 llm = OllamaLLM()
 
-def writer_agent(query, research_notes):
+def writer_agent(query, verified_notes):
     prompt = f"""
-You are a report writer.
+You are a professional report writer.
+
+Write a structured research report.
 
 Topic:
 {query}
 
-Notes:
-{research_notes}
+Verified Notes:
+{verified_notes}
 
-Write a professional report with:
-- Summary
-- Key Points
-- Conclusion
+Format:
+1. Summary
+2. Key Findings
+3. Analysis
+4. Conclusion
 """
     return llm.generate(prompt)
