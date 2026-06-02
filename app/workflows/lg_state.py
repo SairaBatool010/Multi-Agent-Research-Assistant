@@ -7,3 +7,4 @@ class AgentState(TypedDict):
     summary: str
     verified: str
     report: str
+    uploaded_pdf: str

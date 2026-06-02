@@ -1,25 +1,29 @@
 from app.workflows.llm import OllamaLLM
+
 from app.tools.wikipedia_tool import search_wikipedia
-from app.tools.arxiv_tool import search_arxiv
 from app.tools.web_search_tool import web_search
+from app.tools.arxiv_tool import search_arxiv
+from app.tools.rag_tool import rag_search
 
 llm = OllamaLLM()
-
 def research_agent(query, plan):
 
-    # Step 1: Decide which tools to use
     tool_prompt = f"""
 You are a tool routing agent.
 
-Given this query:
+QUERY:
 {query}
 
-Decide which tools to use:
+PLAN:
+{plan}
+
+Available tools:
 - wikipedia
 - web
 - arxiv
+- pdf
 
-Return only tool names as a list.
+Return only tool names.
 """
 
     tool_decision = llm.generate(tool_prompt)
@@ -27,26 +31,31 @@ Return only tool names as a list.
     wiki_data = ""
     web_data = ""
     papers = ""
+    pdf_results = ""
 
-    # Step 2: Conditional tool execution
     if "wikipedia" in tool_decision.lower():
         wiki_data = search_wikipedia(query)
 
     if "web" in tool_decision.lower():
         web_data = web_search(query)
 
-    if "arxiv" in tool_decision.lower():
-        papers = search_arxiv(query)
+    try:
+        if "pdf" in tool_decision.lower():
+            pdf_results = rag_search(query)
+    except Exception:
+        pdf_results = ""
 
-    # Step 3: Synthesis
-    prompt = f"""
+    synthesis_prompt = f"""
 You are a research synthesis agent.
 
-QUERY:
+QUESTION:
 {query}
 
 PLAN:
 {plan}
+
+PDF DOCUMENTS:
+{pdf_results}
 
 WIKIPEDIA:
 {wiki_data}
@@ -57,7 +66,20 @@ WEB:
 ARXIV:
 {papers}
 
-Create structured research notes.
+Create comprehensive structured research notes.
+
+Sections:
+1. Key Findings
+2. Supporting Evidence
+3. Important Facts
+4. Sources Summary
 """
 
-    return llm.generate(prompt)
+    return llm.generate(synthesis_prompt)
+
+
+
+#    if "arxiv" in tool_decision.lower():
+#        papers = search_arxiv(query)
+#ARXIV:
+#{papers}

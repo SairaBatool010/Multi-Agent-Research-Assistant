@@ -1,7 +1,7 @@
 from app.workflows.langgraph_flow import app
 
-if __name__ == "__main__":
-    query = input("Enter topic: ")
+
+def generate_report(query):
 
     result = app.invoke({
         "query": query,
@@ -12,5 +12,4 @@ if __name__ == "__main__":
         "report": ""
     })
 
-    print("\n" + "="*60)
-    print(result["report"])
+    return result["report"]
